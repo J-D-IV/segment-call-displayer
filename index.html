@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script>
+
+  </script>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style type="text/css">
+
+    #container {
+      width: 100%;
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #inputContainer {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    #titleContainer {
+      height: auto;
+      margin: auto;
+    }
+
+    #segmentTitle {
+      font-size: 28px;
+      margin: 15px;
+    }
+
+    #segmentInput {
+      width: 400px;
+      height: 30px;
+      margin-right: 5px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    #segmentButton {
+      width: 100px;
+      height: 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid black;
+    }
+
+    .buttonText {
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin: 10px auto;
+      font-size: 0.9em;
+      font-family: sans-serif;
+      min-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15),0 0 20px rgba(0, 0, 0, 0.15);
+      text-overflow: clip;
+      min-width: 95vw;
+    }
+
+    table thead tr {
+      background-color: #009879;
+      color: #ffffff;
+      text-align: left;
+    }
+
+    table th,
+    table td {
+      padding: 12px 15px;
+    }
+
+    table tbody tr {
+      border-bottom: 1px solid #dddddd;
+    }
+
+    table tbody tr:nth-of-type(even) {
+      background-color: #f3f3f3;
+    }
+
+    table tbody tr:last-of-type {
+      border-bottom: 2px solid #009879;
+    }
+
+    table tbody tr.active-row {
+      font-weight: bold;
+      color: #009879;
+    }
+
+    th {
+      text-align: inherit;
+    }
+
+    td {
+      max-width: 70vw;
+      text-overflow: clip;
+      overflow: overlay;
+    }
+
+    thead {
+      background-color: grey;
+      color: white;
+      font-size: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    tr th {
+      background-color: lightblue;
+    }
+
+    tr {
+      background-color: white;
+    }
+
+  </style>
+  <title>Document</title>
+</head>
+  <body id="body">
+    <div id="container">
+      <div id="titleContainer">
+        <h3 id="segmentTitle">
+          Segment Object Displayer
+        </h3>
+      </div>
+      <div id="inputContainer">
+        <label for="segmentInput"></label>
+        <input placeholder="Paste copied object version of your Segment network call here!" oninput="updateInput(this.value)" id="segmentInput" name="segmentInput" required type="text">
+        <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
+      </div>
+    </div>
+
+
+    <script>
+    function displaySortedTable(jsonObject) {
+      let newObj = document.getElementById('segmentInput').value;
+      newObj = newObj.replaceAll(' ','');
+      newObj = JSON.parse(newObj)
+
+      const flattenObject = (obj, prefix = '') => {
+        return Object.keys(obj).reduce((acc, k) => {
+          const pre = prefix.length ? prefix + '.' : '';
+          if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+            Object.assign(acc, flattenObject(obj[k], pre + k));
+          } else {
+            acc[pre + k] = obj[k];
+          }
+          return acc;
+        }, {});
+      };
+      const flattened = flattenObject(newObj);
+      // Convert flattened object to an array
+      const array = Object.entries(flattened);
+      // Sort array by key name
+      array.sort((a, b) => a[0].localeCompare(b[0]));
+      // Create table header
+      console.table(["Key", "Value"]);
+      let table = {}
+      for (let i = 0; i < array.length; i += 2){
+        let newArr = [array[i], array[i + 1]];
+        newArr.forEach((item, index) => {
+          try {
+            if (item[0]){
+              let value = item[1];
+              if (Array.isArray(value)) {
+                value = value.map((val) => {
+                  if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+                    return JSON.stringify(val);
+                  } else {
+                    return val;
+                  }
+                });
+                value = JSON.stringify(value);
+              } else if (typeof value === 'object' && value !== null) {
+                value = JSON.stringify(value);
+              }
+                table[item[0]] = value
+              }
+            } catch (err) {}
+        });
+      }
+      console.log(table)
+      let returnTable = createNestedTable(table);
+      document.getElementById('container').after(returnTable)
+    }
+
+    function createNestedTable(obj) {
+      const table = document.createElement("table");
+      const tbody = document.createElement("tbody");
+      table.appendChild(tbody);
+
+      const rows = Object.entries(obj);
+      rows.sort(([a], [b]) => a.localeCompare(b));
+
+      let currentGroup = "";
+      let currentGroupHeader = null;
+
+      for (const [key, value] of rows) {
+        const parts = key.split(".");
+        const group = parts[0];
+
+        if (group !== currentGroup) {
+          currentGroup = group;
+
+          const tr = document.createElement("tr");
+          const th = document.createElement("th");
+          th.setAttribute("colspan", "2");
+          th.textContent = group + '  +';
+          th.addEventListener("click", (e) => {
+            let added = false;
+            if (e.target.innerText.indexOf('+') > - 1){
+              e.target.innerText = e.target.innerText.replace('+','-')
+              e.target.style = "background-color: rgb(11 83 108); color: white;"
+              added = true;
+            } 
+            if (e.target.innerText.indexOf('-') > -1 && added == false) {
+              e.target.innerText = e.target.innerText.replace('-','+')
+              e.target.style = "background-color: lightblue; color: black;"
+            }
+            tbody.querySelectorAll(`tr.${group}`).forEach((row) => {
+              row.classList.toggle("hidden");
+            });
+          });
+          tr.appendChild(th);
+          tbody.appendChild(tr);
+
+          currentGroupHeader = th;
+        }
+
+        const tr = document.createElement("tr");
+        tr.classList.add(group, "hidden");
+        tbody.appendChild(tr);
+
+        const td1 = document.createElement("td");
+        td1.textContent = parts.slice(1).join(".");
+        tr.appendChild(td1);
+
+        const td2 = document.createElement("td");
+        td2.textContent = value;
+        tr.appendChild(td2);
+
+        if (currentGroupHeader && tr.classList.contains("hidden")) {
+          currentGroupHeader.classList.add("collapsible");
+        }
+      }
+
+      return table;
+    }
+
+    function updateInput(value){
+      value.trim();
+      let retVal = value.replaceAll(' ', '');
+      console.log('value');
+      console.log(value);
+      document.getElementById('segmentButton').value = retVal;
+      // return retVal;
+    }
+
+
+    // displaySortedTable(objTest);
+    </script>
+
+  </body>
+</html>
