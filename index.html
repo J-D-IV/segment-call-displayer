@@ -116,7 +116,6 @@
     }
 
     td {
-      /* max-width: 70vw; */
       text-overflow: clip;
       overflow: overlay;
     }
@@ -188,7 +187,6 @@
       flex-direction: column;
       align-items: center;
     }
-    
 
   </style>
   <title>Document</title>
@@ -274,8 +272,6 @@
       const array = Object.entries(flattened);
       // Sort array by key name
       array.sort((a, b) => a[0].localeCompare(b[0]));
-      // Create table header
-      console.table(["Key", "Value"]);
       let table = {}
       for (let i = 0; i < array.length; i += 2){
         let newArr = [array[i], array[i + 1]];
@@ -300,7 +296,6 @@
             } catch (err) {}
         });
       }
-      console.log(table)
       let returnTable = createNestedTable(table);
       document.getElementById('tableKeyContainer').style.display = 'flex';
       if (isSingleTable === false){
@@ -334,8 +329,6 @@
         }
       } catch (err) {}
 
-      
-
       const tbody = document.createElement("tbody");
       table.appendChild(tbody);
 
@@ -351,7 +344,6 @@
 
         if (group !== currentGroup) {
           currentGroup = group;
-
           const tr = document.createElement("tr");
           const th = document.createElement("th");
           th.setAttribute("colspan", "2");
@@ -402,19 +394,14 @@
           currentGroupHeader.classList.add("collapsible");
         }
       }
-
       return table;
     }
 
     function updateInput(value){
       value.trim();
       let retVal = value.replaceAll(' ', '');
-      console.log('value');
-      console.log(value);
       document.getElementById('segmentButton').value = retVal;
-      // return retVal;
     }
-
 
     function compareObjects() {
       let obj1 = JSON.parse(document.querySelector('input[name="segmentInput"]').value)
@@ -446,13 +433,8 @@
           obj1[key] = obj1[key] + ' diff';
         }
       }
-
-      console.log(obj1)
-      console.log(obj2)
       displaySortedTable(obj1)
       displaySortedTable(obj2)
-
-      return obj1, obj2;
     }
 
     function revertPage(){
@@ -502,7 +484,6 @@
         </div>
       `
       document.getElementsByTagName('body')[0].innerHTML = startingBody
-      // body.replaceChild(document.getElementById('container'), startingBody)
     }
 
     </script>
