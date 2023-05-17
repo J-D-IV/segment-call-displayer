@@ -20,6 +20,7 @@
     #inputContainer {
       display: flex;
       margin-bottom: 10px;
+      flex-direction: column;
     }
 
     #titleContainer {
@@ -38,6 +39,7 @@
       margin-right: 5px;
       text-align: center;
       font-size: 14px;
+      margin-bottom: 5px;
     }
 
     #segmentButton {
@@ -47,25 +49,37 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      border: 2px solid black;
+    }
+
+    #segmentButton:hover {
+      background-color: rgb(224, 224, 224);
     }
 
     .buttonText {
       font-weight: 700;
-      font-size: 12px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
+    .buttonTextCompare {
+      font-weight: 900;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
     table {
       border-collapse: collapse;
       margin: 10px auto;
       font-size: 0.9em;
       font-family: sans-serif;
-      min-width: 400px;
+      min-width: 45vw;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.15),0 0 20px rgba(0, 0, 0, 0.15);
       text-overflow: clip;
-      min-width: 95vw;
+      max-width: 45vw;
+      height: fit-content;
+      margin: 10px;
     }
 
     table thead tr {
@@ -77,6 +91,7 @@
     table th,
     table td {
       padding: 12px 15px;
+      max-width: 5vw;
     }
 
     table tbody tr {
@@ -101,15 +116,20 @@
     }
 
     td {
-      max-width: 70vw;
+      /* max-width: 70vw; */
       text-overflow: clip;
       overflow: overlay;
+    }
+
+    tbody {
+      border: 5px solid white;
     }
 
     thead {
       background-color: grey;
       color: white;
       font-size: 16px;
+      border: 5px solid white;
     }
 
     .hidden {
@@ -124,6 +144,42 @@
       background-color: white;
     }
 
+    #segmentButtonCompare {
+      width: 100%;
+      height: 40px;
+    }
+
+    #segmentButtonCompare:hover {
+      background-color: rgb(224, 224, 224);
+    }
+
+    #tableContainer {
+      margin-top: 10px;
+      border: solid 2px white;
+      outline: solid 6px rgb(11, 83, 108);
+      background-color: grey;
+      display: none;
+    }
+
+    .keySpanText {
+      height: 30px;
+      width: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    .keySpanImg {
+      height: 15px;
+      width: 50px;
+      border: 2px solid black;
+    }
+
+    #tableKeyContainer {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+
   </style>
   <title>Document</title>
 </head>
@@ -131,22 +187,65 @@
     <div id="container">
       <div id="titleContainer">
         <h3 id="segmentTitle">
-          Segment Object Displayer
+          Segment Call Display & Compare
         </h3>
       </div>
       <div id="inputContainer">
-        <label for="segmentInput"></label>
-        <input placeholder="Paste copied object version of your Segment network call here!" oninput="updateInput(this.value)" id="segmentInput" name="segmentInput" required type="text">
-        <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
+
+        <div style="display: flex;">
+          <input placeholder="Paste copied object version of your Segment network call here!" oninput="updateInput(this.value)" id="segmentInput" name="segmentInput" required type="text">
+          <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
+        </div>
+        
+        <div style="display: flex;">
+          <input placeholder="Paste copied object version of your Segment network call here!" oninput="updateInput(this.value)" id="segmentInput" name="segmentInput2" required type="text">
+          <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
+        </div>
+        <button id="segmentButtonCompare" onclick="compareObjects()" ><span class="buttonTextCompare">Compare</span> <span class="buttonTextCompare">Objects</span></button>
+      
+      <div id="tableKeyContainer" style="display:none; margin-top: 5px;">
+        <div style="display:flex;">
+          <span class="keySpanImg" style="background-color: rgb(226 203 255); margin-right: 5px; margin-top: 5px;">
+          </span>
+          <span class="keySpanText">
+            = difference between compared values
+          </span>
+        </div>
+      
+        <div style="display:flex;">
+          <span class="keySpanImg" style="background-color: #faffbd; margin-left: 5px; margin-right: 5px; margin-top: 5px;">
+          </span>
+          <span class="keySpanText">
+            = unique value found in object
+          </span>
+        </div>
+      </div>
+
+      </div>
+
+      <div id="tableContainer">
+
       </div>
     </div>
 
 
     <script>
     function displaySortedTable(jsonObject) {
-      let newObj = document.getElementById('segmentInput').value;
-      newObj = newObj.replaceAll(' ','');
-      newObj = JSON.parse(newObj)
+      let newObj
+      let isSingleTable = false
+      try {
+        if (jsonObject){
+          newObj = JSON.stringify(jsonObject)
+          newObj = newObj.replaceAll(' ','');
+          newObj = JSON.parse(newObj)
+        } else {
+          newObj = document.getElementById('segmentInput').value;
+          newObj = newObj.replaceAll(' ','');
+          newObj = JSON.parse(newObj)
+          isSingleTable = true;
+        }
+      } catch (err) {}
+      
 
       const flattenObject = (obj, prefix = '') => {
         return Object.keys(obj).reduce((acc, k) => {
@@ -192,11 +291,40 @@
       }
       console.log(table)
       let returnTable = createNestedTable(table);
-      document.getElementById('container').after(returnTable)
+      document.getElementById('tableKeyContainer').style.display = 'flex';
+      if (isSingleTable === false){
+        document.getElementById('tableContainer').style.display = 'flex';
+        document.getElementById('tableContainer').appendChild(returnTable)
+      } else {
+        document.getElementById('tableContainer').style.display = 'flex';
+        document.getElementById('tableContainer').after(returnTable)
+      }
     }
-
+    let tableNum = "1"
     function createNestedTable(obj) {
       const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const theadTr = document.createElement("tr");
+      thead.appendChild(theadTr);
+      const theadTh = document.createElement("th");
+      theadTh.textContent = 'Object ' + tableNum
+      theadTr.appendChild(theadTh)
+      const theadTh2 = document.createElement("th");
+      theadTr.appendChild(theadTh2)
+
+      table.appendChild(thead);
+      try {
+        if (tableNum === "1"){
+          table.className = "table" + tableNum;
+          table.title = "table" + tableNum;
+          tableNum = 2;
+        } else {
+          table.title = "table" + tableNum;
+        }
+      } catch (err) {}
+
+      
+
       const tbody = document.createElement("tbody");
       table.appendChild(tbody);
 
@@ -248,6 +376,15 @@
 
         const td2 = document.createElement("td");
         td2.textContent = value;
+        if (td2.textContent.indexOf('diff') > -1){
+          td2.style.backgroundColor = "rgb(226 203 255)"
+          td2.textContent = td2.textContent.replaceAll('diff','')
+        }
+
+        if (td2.textContent.indexOf('unique') > -1){
+          td2.style.backgroundColor = "#faffbd"
+          td2.textContent = td2.textContent.replaceAll('unique','')
+        }
         tr.appendChild(td2);
 
         if (currentGroupHeader && tr.classList.contains("hidden")) {
@@ -268,7 +405,45 @@
     }
 
 
-    // displaySortedTable(objTest);
+    function compareObjects() {
+      let obj1 = JSON.parse(document.querySelector('input[name="segmentInput"]').value)
+      let obj2 = JSON.parse(document.querySelector('input[name="segmentInput2"]').value)
+
+      // Check for key-value pairs in obj1 that are not in obj2
+      for (let key in obj1) {
+        if (!obj2.hasOwnProperty(key)) {
+          obj1[key] = obj1[key] + ' unique';
+        }
+      }
+      // Check for key-value pairs in obj1 that are not in obj2
+      for (let key in obj2) {
+        if (!obj1.hasOwnProperty(key)) {
+          obj2[key] = obj2[key] + ' unique';
+        }
+      }
+      // Compare key-value pairs in obj2 against obj1
+      for (let key in obj2) {
+        if (obj1[key] !== obj2[key] &&
+            obj2[key].indexOf('unique') == -1) {
+          obj2[key] = obj2[key] + ' diff';
+        }
+      }
+      // Compare key-value pairs in obj1 against obj2
+      for (let key in obj1) {
+        if (obj2[key] !== obj1[key] &&
+            obj1[key].indexOf('unique') == -1) {
+          obj1[key] = obj1[key] + ' diff';
+        }
+      }
+
+      console.log(obj1)
+      console.log(obj2)
+      displaySortedTable(obj1)
+      displaySortedTable(obj2)
+
+      return obj1, obj2;
+    }
+
     </script>
 
   </body>
