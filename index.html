@@ -153,6 +153,16 @@
       background-color: rgb(224, 224, 224);
     }
 
+    #segmentButtonReset {
+      width: 100%;
+      height: 40px;
+      background-color: rgb(251, 190, 190);
+    }
+
+    #segmentButtonReset:hover {
+      background-color: rgb(255, 128, 128);
+    }
+
     #tableContainer {
       margin-top: 10px;
       border: solid 2px white;
@@ -202,6 +212,7 @@
           <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
         </div>
         <button id="segmentButtonCompare" onclick="compareObjects()" ><span class="buttonTextCompare">Compare</span> <span class="buttonTextCompare">Objects</span></button>
+        <button id="segmentButtonReset" onclick="revertPage()" ><span class="buttonTextCompare">Revert</span> <span class="buttonTextCompare">Page</span></button>
       
       <div id="tableKeyContainer" style="display:none; margin-top: 5px;">
         <div style="display:flex;">
@@ -221,12 +232,12 @@
         </div>
       </div>
 
-      </div>
-
-      <div id="tableContainer">
-
-      </div>
     </div>
+
+    <div id="tableContainer">
+
+    </div>
+  </div>
 
 
     <script>
@@ -442,6 +453,56 @@
       displaySortedTable(obj2)
 
       return obj1, obj2;
+    }
+
+    function revertPage(){
+      const startingBody = `
+        <div id="container">
+          <div id="titleContainer">
+            <h3 id="segmentTitle">
+              Segment Call Display & Compare
+            </h3>
+          </div>
+          <div id="inputContainer">
+
+            <div style="display: flex;">
+              <input placeholder="Paste copied object version of your Segment network call here!" oninput="updateInput(this.value)" id="segmentInput" name="segmentInput" required type="text">
+              <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
+            </div>
+            
+            <div style="display: flex;">
+              <input placeholder="Paste copied object version of your Segment network call here!" oninput="updateInput(this.value)" id="segmentInput" name="segmentInput2" required type="text">
+              <button id="segmentButton" onclick="displaySortedTable()"><span class="buttonText">Create</span> <span class="buttonText">Table</span></button>
+            </div>
+            <button id="segmentButtonCompare" onclick="compareObjects()" ><span class="buttonTextCompare">Compare</span> <span class="buttonTextCompare">Objects</span></button>
+            <button id="segmentButtonReset" onclick="revertPage()" ><span class="buttonTextCompare">Revert</span> <span class="buttonTextCompare">Page</span></button>
+          
+          <div id="tableKeyContainer" style="display:none; margin-top: 5px;">
+            <div style="display:flex;">
+              <span class="keySpanImg" style="background-color: rgb(226 203 255); margin-right: 5px; margin-top: 5px;">
+              </span>
+              <span class="keySpanText">
+                = difference between compared values
+              </span>
+            </div>
+          
+            <div style="display:flex;">
+              <span class="keySpanImg" style="background-color: #faffbd; margin-left: 5px; margin-right: 5px; margin-top: 5px;">
+              </span>
+              <span class="keySpanText">
+                = unique value found in object
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="tableContainer">
+
+        </div>
+      `
+      document.getElementsByTagName('body')[0].innerHTML = startingBody
+      // body.replaceChild(document.getElementById('container'), startingBody)
     }
 
     </script>
